@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduCore — School Management System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+ 
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Outfit', 'sans-serif'],
+            body: ['DM Sans', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50:  '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              300: '#a5b4fc',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+            }
+          },
+          boxShadow: {
+            'card': '0 1px 3px 0 rgba(0,0,0,.06), 0 4px 16px -2px rgba(0,0,0,.08)',
+            'card-hover': '0 4px 6px 0 rgba(0,0,0,.07), 0 12px 28px -4px rgba(0,0,0,.12)',
+            'sidebar': '4px 0 24px -2px rgba(0,0,0,.18)',
+          }
+        }
+      }
+    }
+  </script>
+ 
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; }
+    h1,h2,h3,h4,h5,h6,.font-display { font-family: 'Outfit', sans-serif; }
+ 
+    /* ─── Sidebar ───────────────────────────────────────────── */
+    #sidebar {
+      transition: transform .3s cubic-bezier(.4,0,.2,1), width .3s cubic-bezier(.4,0,.2,1);
+    }
+    #sidebar.collapsed { transform: translateX(-100%); }
+ 
+    /* ─── Sidebar link active / hover ───────────────────────── */
+    .nav-link {
+      position: relative;
+      transition: background .2s, color .2s;
+    }
+    .nav-link.active {
+      background: rgba(99,102,241,.18);
+      color: #818cf8;
+    }
+    .nav-link.active .nav-icon { color: #818cf8; }
+    .nav-link.active::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 50%;
+      transform: translateY(-50%);
+      width: 3px; height: 60%;
+      background: #6366f1;
+      border-radius: 0 4px 4px 0;
+    }
+    .nav-link:not(.active):hover {
+      background: rgba(255,255,255,.06);
+      color: #c7d2fe;
+    }
+ 
+    /* ─── Page sections ──────────────────────────────────────── */
+    .page-section { display: none; }
+    .page-section.active { display: block; }
+ 
+    /* ─── Table row hover ────────────────────────────────────── */
+    .data-table tbody tr { transition: background .15s; }
+    .data-table tbody tr:hover { background: #f8faff; }
+ 
+    /* ─── Badge colours ──────────────────────────────────────── */
+    .badge-active   { background:#d1fae5; color:#065f46; }
+    .badge-absent   { background:#fee2e2; color:#991b1b; }
+    .badge-late     { background:#fef3c7; color:#92400e; }
+    .badge-passed   { background:#dbeafe; color:#1e40af; }
+    .badge-failed   { background:#fce7f3; color:#9d174d; }
+ 
+    /* ─── Custom scrollbar ───────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+ 
+    /* ─── Toggle switch for attendance ──────────────────────── */
+    .toggle-group { display: flex; gap: 4px; }
+    .toggle-btn {
+      padding: 4px 10px;
+      font-size: .72rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      transition: all .15s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .toggle-btn.present { background:#d1fae5; color:#065f46; border-color:#6ee7b7; }
+    .toggle-btn.absent  { background:#fee2e2; color:#991b1b; border-color:#fca5a5; }
+    .toggle-btn.late    { background:#fef3c7; color:#92400e; border-color:#fcd34d; }
+    .toggle-btn.inactive {
+      background: #f1f5f9;
+      color: #94a3b8;
+      border-color: transparent;
+    }
+    .toggle-btn.inactive:hover { background:#e2e8f0; color:#64748b; }
+ 
+    /* ─── Form inputs ─────────────────────────────────────────── */
+    .form-input {
+      width: 100%;
+      padding: .55rem .85rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: .875rem;
+      font-family: 'DM Sans', sans-serif;
+      background: #fff;
+      color: #1e293b;
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+    .form-input:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99,102,241,.12);
+    }
+    .form-label {
+      display: block;
+      font-size: .8rem;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: .35rem;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+    }
+ 
+    /* ─── Toast notification ─────────────────────────────────── */
+    #toast {
+      transition: opacity .3s, transform .3s;
+    }
+    #toast.hide { opacity: 0; transform: translateY(16px); pointer-events: none; }
+    #toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+ 
+    /* ─── Stat card shimmer ──────────────────────────────────── */
+    .stat-card {
+      transition: transform .2s, box-shadow .2s;
+    }
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px -4px rgba(0,0,0,.12);
+    }
+ 
+    /* ─── Overlay for mobile sidebar ────────────────────────── */
+    #sidebar-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(15,23,42,.5);
+      z-index: 40;
+      backdrop-filter: blur(2px);
+    }
+    #sidebar-overlay.show { display: block; }
+ 
+    /* ─── Smooth score bar ───────────────────────────────────── */
+    .score-bar {
+      height: 6px;
+      border-radius: 99px;
+      background: #e2e8f0;
+      overflow: hidden;
+    }
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width .6s cubic-bezier(.4,0,.2,1);
+    }
+ 
+    /* ─── Header decorative gradient ─────────────────────────── */
+    .page-header-gradient {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #6366f1 100%);
+    }
+ 
+    @media (max-width: 768px) {
+      #sidebar {
+        position: fixed;
+        z-index: 50;
+        height: 100%;
+        transform: translateX(-100%);
+      }
+      #sidebar.open {
+        transform: translateX(0);
+      }
+      #main-content { margin-left: 0 !important; }
+    }
+  </style>
+</head>
+ 
+<body class="bg-slate-50 text-slate-800">
+ 
+<!-- ══════════════════════════════════════════════════════════
+     SIDEBAR OVERLAY (mobile)
+══════════════════════════════════════════════════════════ -->
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
+ 
+<!-- ══════════════════════════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════════════════════════ -->
+<aside id="sidebar"
+  class="fixed top-0 left-0 h-screen w-64 bg-slate-900 flex flex-col z-50 shadow-sidebar overflow-hidden">
+ 
+  <!-- Logo -->
+  <div class="px-6 py-5 border-b border-slate-700/60">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl page-header-gradient flex items-center justify-center shadow-lg flex-shrink-0">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 14l9-5-9-5-9 5 9 5z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 14l6.16-3.422A12.08 12.08 0 0121 12c0 2.2-1 4-3 5.5S15 19.5 12 19.5"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 14v7M3 12c0 2.2 1 4 3 5.5S9 19.5 12 19.5"/>
+        </svg>
+      </div>
+      <div>
+        <p class="font-display font-700 text-white text-lg leading-tight" style="font-weight:700">EduCore</p>
+        <p class="text-slate-400 text-xs font-medium">School Management</p>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- User Profile -->
+  <div class="px-4 py-4 border-b border-slate-700/60">
+    <div class="flex items-center gap-3 bg-slate-800/60 rounded-xl px-3 py-2.5">
+      <div class="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-display font-700 text-sm flex-shrink-0" style="font-weight:700">
+        AK
+      </div>
+      <div class="min-w-0">
+        <p class="text-white text-sm font-semibold truncate font-display">Amina Koroma</p>
+        <p class="text-slate-400 text-xs">Administrator</p>
+      </div>
+      <div class="ml-auto w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0"></div>
+    </div>
+  </div>
+ 
+  <!-- Navigation -->
+  <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+    <p class="text-slate-500 text-xs font-semibold uppercase tracking-wider px-3 mb-3">Main Menu</p>
+ 
+    <button onclick="showPage('registration')" data-page="registration"
+      class="nav-link active w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-300 text-sm font-medium text-left">
+      <svg class="nav-icon w-5 h-5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+      </svg>
+      <span>Registration</span>
+    </button>
+ 
+    <button onclick="showPage('student-report')" data-page="student-report"
+      class="nav-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-300 text-sm font-medium text-left">
+      <svg class="nav-icon w-5 h-5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+      </svg>
+      <span>Student Report</span>
+    </button>
+ 
+    <button onclick="showPage('exam-report')" data-page="exam-report"
+      class="nav-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-300 text-sm font-medium text-left">
+      <svg class="nav-icon w-5 h-5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0120 9.414V19a2 2 0 01-2 2z"/>
+      </svg>
+      <span>Exam Report</span>
+    </button>
+ 
+    <button onclick="showPage('attendance')" data-page="attendance"
+      class="nav-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-300 text-sm font-medium text-left">
+      <svg class="nav-icon w-5 h-5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+      </svg>
+      <span>Attendance</span>
+    </button>
+ 
+    <div class="pt-4">
+      <p class="text-slate-500 text-xs font-semibold uppercase tracking-wider px-3 mb-3">Settings</p>
+      <button class="nav-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-300 text-sm font-medium text-left">
+        <svg class="nav-icon w-5 h-5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        <span>Preferences</span>
+      </button>
+    </div>
+  </nav>
+ 
+  <!-- Footer -->
+  <div class="px-4 py-3 border-t border-slate-700/60">
+    <p class="text-slate-500 text-xs text-center">EduCore v2.1 · Academic Year 2025</p>
+  </div>
+</aside>
+ 
+<!-- ══════════════════════════════════════════════════════════
+     MAIN LAYOUT WRAPPER
+══════════════════════════════════════════════════════════ -->
+<div id="main-content" class="ml-64 min-h-screen flex flex-col">
+ 
+  <!-- Top bar -->
+  <header class="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-slate-200 px-6 py-3 flex items-center gap-4">
+    <!-- Mobile hamburger -->
+    <button id="hamburger" onclick="openSidebar()"
+      class="md:hidden p-2 rounded-lg hover:bg-slate-100 transition text-slate-600">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+ 
+    <div class="flex-1">
+      <h2 id="page-title" class="font-display font-700 text-slate-800 text-lg" style="font-weight:700">Registration</h2>
+      <p id="page-subtitle" class="text-slate-400 text-xs">Register new students into the system</p>
+    </div>
+ 
+    <div class="flex items-center gap-3">
+      <!-- Notification bell -->
+      <button class="relative p-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition text-slate-600">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+        </svg>
+        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-indigo-500 rounded-full"></span>
+      </button>
+      <!-- Academic year badge -->
+      <span class="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-lg border border-indigo-100">
+        <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+        2024–2025
+      </span>
+    </div>
+  </header>
+ 
+  <!-- Page Content -->
+  <main class="flex-1 p-6">
+ 
+    <!-- ════════════════════════════════════════════════════════
+         PAGE 1: REGISTRATION
+    ════════════════════════════════════════════════════════ -->
+    <section id="page-registration" class="page-section active">
+ 
+      <!-- Toast notification -->
+      <div id="toast"
+        class="hide fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl">
+        <div class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+        <div>
+          <p class="font-semibold text-sm">Student Registered!</p>
+          <p class="text-slate-400 text-xs" id="toast-msg">Record saved successfully.</p>
+        </div>
+        <button onclick="hideToast()" class="ml-2 text-slate-400 hover:text-white transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+ 
+      <!-- Header Card -->
+      <div class="rounded-2xl page-header-gradient p-6 mb-6 text-white relative overflow-hidden">
+        <div class="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/5"></div>
+        <div class="absolute -right-2 top-12 w-20 h-20 rounded-full bg-white/5"></div>
+        <p class="text-indigo-200 text-sm font-medium mb-1">Student Management</p>
+        <h3 class="font-display text-2xl font-700 mb-1" style="font-weight:700">New Student Registration</h3>
+        <p class="text-indigo-200 text-sm">Complete all sections below to enrol a new student</p>
+      </div>
+ 
+      <div class="bg-white rounded-2xl shadow-card p-6 md:p-8">
+ 
+        <!-- Step indicators -->
+        <div class="flex items-center gap-0 mb-8 overflow-x-auto pb-2">
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-700 font-display" style="font-weight:700">1</div>
+            <span class="text-sm font-semibold text-slate-700">Personal Info</span>
+          </div>
+          <div class="flex-1 min-w-8 h-0.5 bg-indigo-200 mx-2"></div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-700 font-display" style="font-weight:700">2</div>
+            <span class="text-sm font-semibold text-slate-700">Guardian Info</span>
+          </div>
+          <div class="flex-1 min-w-8 h-0.5 bg-indigo-200 mx-2"></div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-sm font-700 font-display" style="font-weight:700">3</div>
+            <span class="text-sm font-medium text-slate-400">Academic Info</span>
+          </div>
+        </div>
+ 
+        <form id="registration-form" onsubmit="handleRegistration(event)">
+          <!-- Section 1: Personal Info -->
+          <div class="mb-8">
+            <div class="flex items-center gap-2 mb-5">
+              <div class="w-1 h-5 bg-indigo-500 rounded-full"></div>
+              <h4 class="font-display font-700 text-slate-800" style="font-weight:700">Personal Information</h4>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label class="form-label">Full Name <span class="text-rose-400">*</span></label>
+                <input type="text" class="form-input" placeholder="e.g. Fatima Hassan" required id="reg-name"/>
+              </div>
+              <div>
+                <label class="form-label">Student ID</label>
+                <input type="text" class="form-input bg-slate-50" value="STU-2025-0047" readonly
+                  style="color:#64748b; cursor:not-allowed"/>
+              </div>
+              <div>
+                <label class="form-label">Date of Birth <span class="text-rose-400">*</span></label>
+                <input type="date" class="form-input" required id="reg-dob"/>
+              </div>
+              <div>
+                <label class="form-label">Gender <span class="text-rose-400">*</span></label>
+                <select class="form-input" required id="reg-gender">
+                  <option value="">Select gender</option>
+                  <option>Male</option>
+                  <option>Female</option>
+                  <option>Prefer not to say</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Nationality</label>
+                <input type="text" class="form-input" placeholder="e.g. Somali" id="reg-nationality"/>
+              </div>
+              <div>
+                <label class="form-label">Religion</label>
+                <input type="text" class="form-input" placeholder="e.g. Islam" id="reg-religion"/>
+              </div>
+            </div>
+          </div>
+ 
+          <!-- Section 2: Guardian Info -->
+          <div class="mb-8">
+            <div class="flex items-center gap-2 mb-5">
+              <div class="w-1 h-5 bg-purple-500 rounded-full"></div>
+              <h4 class="font-display font-700 text-slate-800" style="font-weight:700">Parent / Guardian Information</h4>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label class="form-label">Guardian Name <span class="text-rose-400">*</span></label>
+                <input type="text" class="form-input" placeholder="Full name" required id="reg-guardian"/>
+              </div>
+              <div>
+                <label class="form-label">Relationship</label>
+                <select class="form-input" id="reg-relationship">
+                  <option>Father</option>
+                  <option>Mother</option>
+                  <option>Uncle/Aunt</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Phone Number <span class="text-rose-400">*</span></label>
+                <input type="tel" class="form-input" placeholder="+252 61 000 0000" required id="reg-phone"/>
+              </div>
+              <div>
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-input" placeholder="guardian@example.com" id="reg-email"/>
+              </div>
+              <div class="md:col-span-2">
+                <label class="form-label">Home Address <span class="text-rose-400">*</span></label>
+                <textarea class="form-input" rows="2" placeholder="Street, District, City" required id="reg-address"></textarea>
+              </div>
+            </div>
+          </div>
+ 
+          <!-- Section 3: Academic Info -->
+          <div class="mb-8">
+            <div class="flex items-center gap-2 mb-5">
+              <div class="w-1 h-5 bg-emerald-500 rounded-full"></div>
+              <h4 class="font-display font-700 text-slate-800" style="font-weight:700">Academic Information</h4>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div>
+                <label class="form-label">Class / Grade <span class="text-rose-400">*</span></label>
+                <select class="form-input" required id="reg-class">
+                  <option value="">Select class</option>
+                  <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option>
+                  <option>Grade 4</option><option>Grade 5</option><option>Grade 6</option>
+                  <option>Grade 7</option><option>Grade 8</option><option>Grade 9</option>
+                  <option>Grade 10</option><option>Grade 11</option><option>Grade 12</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Academic Year</label>
+                <select class="form-input" id="reg-year">
+                  <option>2024–2025</option><option>2025–2026</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Admission Date</label>
+                <input type="date" class="form-input" id="reg-admission"/>
+              </div>
+              <div class="md:col-span-3">
+                <label class="form-label">Medical Notes / Special Needs</label>
+                <textarea class="form-input" rows="2"
+                  placeholder="Any allergies, disabilities, or health conditions..." id="reg-medical"></textarea>
+              </div>
+            </div>
+          </div>
+ 
+          <!-- Submit row -->
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100">
+            <p class="text-slate-400 text-sm">
+              <span class="text-rose-400">*</span> Required fields
+            </p>
+            <div class="flex gap-3">
+              <button type="button" onclick="document.getElementById('registration-form').reset()"
+                class="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition">
+                Clear Form
+              </button>
+              <button type="submit"
+                class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-lg shadow-indigo-200 hover:shadow-indigo-300 transition-all duration-200 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Submit Registration
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+ 
+    <!-- ════════════════════════════════════════════════════════
+         PAGE 2: STUDENT REPORT
+    ════════════════════════════════════════════════════════ -->
+    <section id="page-student-report" class="page-section">
+ 
+      <!-- Search & Filter bar -->
+      <div class="flex flex-col sm:flex-row gap-3 mb-6">
+        <div class="relative flex-1">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input type="text" id="student-search" oninput="filterStudentList()" placeholder="Search by name or ID…"
+            class="form-input pl-9" />
+        </div>
+        <select id="student-class-filter" onchange="filterStudentList()" class="form-input sm:w-44">
+          <option value="">All Classes</option>
+          <option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option>
+        </select>
+        <button onclick="filterStudentList()"
+          class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition flex items-center gap-2 flex-shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          Search
+        </button>
+      </div>
+ 
+      <!-- Student list + detail view -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+ 
+        <!-- Student List -->
+        <div class="lg:col-span-1 bg-white rounded-2xl shadow-card overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h4 class="font-display font-700 text-slate-800 text-sm" style="font-weight:700">Students</h4>
+            <span id="student-count" class="text-xs bg-indigo-50 text-indigo-600 font-semibold px-2.5 py-1 rounded-lg">6</span>
+          </div>
+          <div id="student-list" class="divide-y divide-slate-50 overflow-y-auto" style="max-height:520px"></div>
+        </div>
+ 
+        <!-- Student Detail -->
+        <div class="lg:col-span-2 space-y-5">
+ 
+          <!-- Profile card -->
+          <div id="student-detail-card" class="bg-white rounded-2xl shadow-card p-6">
+            <div class="flex items-start gap-5">
+              <div id="student-avatar"
+                class="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-display font-700 text-2xl flex-shrink-0 shadow-lg"
+                style="font-weight:700">FK</div>
+              <div class="flex-1 min-w-0">
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                  <h3 id="sd-name" class="font-display font-700 text-slate-800 text-xl" style="font-weight:700">Fatima Hassan</h3>
+                  <span class="badge-active text-xs font-semibold px-2.5 py-0.5 rounded-full">Active</span>
+                </div>
+                <p id="sd-id" class="text-slate-400 text-sm mb-3">STU-2025-0001 · Grade 10</p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div class="bg-slate-50 rounded-xl p-3 text-center">
+                    <p class="text-slate-500 text-xs mb-0.5">Attendance</p>
+                    <p id="sd-attend" class="font-display font-700 text-indigo-600 text-lg" style="font-weight:700">92%</p>
+                  </div>
+                  <div class="bg-slate-50 rounded-xl p-3 text-center">
+                    <p class="text-slate-500 text-xs mb-0.5">Average</p>
+                    <p id="sd-avg" class="font-display font-700 text-emerald-600 text-lg" style="font-weight:700">78.4</p>
+                  </div>
+                  <div class="bg-slate-50 rounded-xl p-3 text-center">
+                    <p class="text-slate-500 text-xs mb-0.5">Rank</p>
+                    <p id="sd-rank" class="font-display font-700 text-purple-600 text-lg" style="font-weight:700">#3</p>
+                  </div>
+                  <div class="bg-slate-50 rounded-xl p-3 text-center">
+                    <p class="text-slate-500 text-xs mb-0.5">Class</p>
+                    <p id="sd-class" class="font-display font-700 text-slate-700 text-lg" style="font-weight:700">G-10</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+ 
+          <!-- Performance table -->
+          <div class="bg-white rounded-2xl shadow-card overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100">
+              <h4 class="font-display font-700 text-slate-800" style="font-weight:700">Performance Overview</h4>
+              <p class="text-slate-400 text-xs mt-0.5">Term 2 · Academic Year 2024–2025</p>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="data-table w-full text-sm">
+                <thead>
+                  <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                    <th class="text-left px-6 py-3 font-semibold">Subject</th>
+                    <th class="text-center px-4 py-3 font-semibold">CA Score<br><span class="normal-case text-slate-400">/40</span></th>
+                    <th class="text-center px-4 py-3 font-semibold">Exam Score<br><span class="normal-case text-slate-400">/60</span></th>
+                    <th class="text-center px-4 py-3 font-semibold">Total<br><span class="normal-case text-slate-400">/100</span></th>
+                    <th class="text-center px-4 py-3 font-semibold">Grade</th>
+                    <th class="text-center px-4 py-3 font-semibold">Remark</th>
+                  </tr>
+                </thead>
+                <tbody id="performance-table" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+ 
+    <!-- ════════════════════════════════════════════════════════
+         PAGE 3: EXAM REPORT
+    ════════════════════════════════════════════════════════ -->
+    <section id="page-exam-report" class="page-section">
+ 
+      <!-- Filters -->
+      <div class="bg-white rounded-2xl shadow-card p-4 mb-6 flex flex-wrap gap-3 items-end">
+        <div class="flex-1 min-w-36">
+          <label class="form-label">Academic Year</label>
+          <select class="form-input" onchange="renderExamReport()">
+            <option>2024–2025</option><option>2023–2024</option>
+          </select>
+        </div>
+        <div class="flex-1 min-w-36">
+          <label class="form-label">Term</label>
+          <select class="form-input" id="exam-term" onchange="renderExamReport()">
+            <option>Term 1</option><option selected>Term 2</option><option>Term 3</option>
+          </select>
+        </div>
+        <div class="flex-1 min-w-36">
+          <label class="form-label">Class / Grade</label>
+          <select class="form-input" id="exam-class" onchange="renderExamReport()">
+            <option>Grade 10</option><option>Grade 9</option><option>Grade 11</option>
+          </select>
+        </div>
+        <button onclick="renderExamReport()"
+          class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
+          </svg>
+          Apply Filter
+        </button>
+      </div>
+ 
+      <!-- Metric Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
+        <div class="stat-card bg-white rounded-2xl shadow-card p-5 flex items-center gap-4">
+          <div class="w-13 h-13 rounded-xl bg-indigo-50 flex items-center justify-center flex-shrink-0" style="width:52px;height:52px">
+            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-slate-400 text-xs font-medium mb-0.5">Class Average</p>
+            <p id="exam-avg" class="font-display font-700 text-slate-800 text-3xl" style="font-weight:700">68.4</p>
+            <p class="text-indigo-500 text-xs font-medium">↑ 3.2 from last term</p>
+          </div>
+        </div>
+        <div class="stat-card bg-white rounded-2xl shadow-card p-5 flex items-center gap-4">
+          <div class="w-13 h-13 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0" style="width:52px;height:52px">
+            <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-slate-400 text-xs font-medium mb-0.5">Highest Score</p>
+            <p id="exam-high" class="font-display font-700 text-slate-800 text-3xl" style="font-weight:700">94</p>
+            <p class="text-emerald-500 text-xs font-medium">Fatima Hassan · G10</p>
+          </div>
+        </div>
+        <div class="stat-card bg-white rounded-2xl shadow-card p-5 flex items-center gap-4">
+          <div class="w-13 h-13 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0" style="width:52px;height:52px">
+            <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-slate-400 text-xs font-medium mb-0.5">Passing Rate</p>
+            <p id="exam-pass" class="font-display font-700 text-slate-800 text-3xl" style="font-weight:700">83%</p>
+            <p class="text-amber-500 text-xs font-medium">5 of 6 students passed</p>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- Results Table -->
+      <div class="bg-white rounded-2xl shadow-card overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+          <div>
+            <h4 class="font-display font-700 text-slate-800" style="font-weight:700">Exam Results</h4>
+            <p class="text-slate-400 text-xs mt-0.5" id="exam-table-subtitle">Grade 10 · Term 2 · 2024–2025</p>
+          </div>
+          <button class="text-xs text-indigo-600 font-semibold hover:text-indigo-700 flex items-center gap-1.5 transition">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+            </svg>
+            Export PDF
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="data-table w-full text-sm">
+            <thead>
+              <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                <th class="text-left px-6 py-3 font-semibold">Rank</th>
+                <th class="text-left px-6 py-3 font-semibold">Student Name</th>
+                <th class="text-left px-4 py-3 font-semibold">Student ID</th>
+                <th class="text-center px-4 py-3 font-semibold">Total Marks</th>
+                <th class="text-center px-4 py-3 font-semibold">Average</th>
+                <th class="text-center px-4 py-3 font-semibold">Grade</th>
+                <th class="text-center px-4 py-3 font-semibold">Status</th>
+              </tr>
+            </thead>
+            <tbody id="exam-results-table" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+ 
+    <!-- ════════════════════════════════════════════════════════
+         PAGE 4: ATTENDANCE
+    ════════════════════════════════════════════════════════ -->
+    <section id="page-attendance" class="page-section">
+ 
+      <!-- Controls -->
+      <div class="bg-white rounded-2xl shadow-card p-5 mb-6">
+        <div class="flex flex-wrap gap-4 items-end">
+          <div class="flex-1 min-w-36">
+            <label class="form-label">Date</label>
+            <input type="date" id="attend-date" class="form-input"
+              value="" onchange="renderAttendance()" />
+          </div>
+          <div class="flex-1 min-w-36">
+            <label class="form-label">Class / Grade</label>
+            <select id="attend-class" class="form-input" onchange="renderAttendance()">
+              <option>Grade 10</option><option>Grade 9</option><option>Grade 11</option>
+            </select>
+          </div>
+          <div class="flex-1 min-w-36">
+            <label class="form-label">Session</label>
+            <select class="form-input">
+              <option>Morning</option><option>Afternoon</option><option>Full Day</option>
+            </select>
+          </div>
+          <button onclick="saveAttendance()"
+            class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold transition flex items-center gap-2 flex-shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Save Attendance
+          </button>
+        </div>
+      </div>
+ 
+      <!-- Summary bar -->
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-2xl shadow-card p-4 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-slate-400 text-xs">Total Students</p>
+            <p id="att-total" class="font-display font-700 text-slate-800 text-xl" style="font-weight:700">6</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-card p-4 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-slate-400 text-xs">Present</p>
+            <p id="att-present" class="font-display font-700 text-emerald-600 text-xl" style="font-weight:700">0</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-card p-4 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-slate-400 text-xs">Absent</p>
+            <p id="att-absent" class="font-display font-700 text-rose-600 text-xl" style="font-weight:700">0</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-card p-4 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-slate-400 text-xs">Late</p>
+            <p id="att-late" class="font-display font-700 text-amber-600 text-xl" style="font-weight:700">0</p>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- Progress bar -->
+      <div class="bg-white rounded-2xl shadow-card p-4 mb-6">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-sm font-semibold text-slate-600">Attendance Rate</p>
+          <p id="att-rate" class="text-sm font-700 text-indigo-600 font-display" style="font-weight:700">0%</p>
+        </div>
+        <div class="score-bar">
+          <div id="att-rate-bar" class="score-bar-fill bg-gradient-to-r from-indigo-500 to-emerald-500" style="width:0%"></div>
+        </div>
+      </div>
+ 
+      <!-- Attendance Sheet -->
+      <div class="bg-white rounded-2xl shadow-card overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+          <div>
+            <h4 class="font-display font-700 text-slate-800" style="font-weight:700">Attendance Sheet</h4>
+            <p class="text-slate-400 text-xs mt-0.5" id="att-subtitle">Grade 10 · Today</p>
+          </div>
+          <div class="flex gap-2 text-xs">
+            <span class="badge-active px-2.5 py-1 rounded-full font-semibold">● Present</span>
+            <span class="badge-absent px-2.5 py-1 rounded-full font-semibold">● Absent</span>
+            <span class="badge-late px-2.5 py-1 rounded-full font-semibold">● Late</span>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="data-table w-full text-sm">
+            <thead>
+              <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                <th class="text-left px-6 py-3 font-semibold">#</th>
+                <th class="text-left px-6 py-3 font-semibold">Student Name</th>
+                <th class="text-left px-4 py-3 font-semibold">Student ID</th>
+                <th class="text-center px-4 py-3 font-semibold">Status</th>
+                <th class="text-center px-4 py-3 font-semibold">Mark Attendance</th>
+              </tr>
+            </thead>
+            <tbody id="attendance-table" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+ 
+  </main>
+ 
+  <!-- Footer -->
+  <footer class="px-6 py-4 border-t border-slate-200 text-center">
+    <p class="text-slate-400 text-xs">© 2025 EduCore School Management System · All rights reserved</p>
+  </footer>
+</div>
+ 
+ 
+<!-- ══════════════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════════════ -->
+<script>
+/* ─────────────────────────────────────────────────────────────
+   MOCK DATA
+───────────────────────────────────────────────────────────── */
+const students = [
+  {
+    id: 'STU-2025-0001', name: 'Fatima Hassan',    gender: 'Female', grade: 'Grade 10',
+    attendRate: '92%', avg: 78.4, rank: '#1', initials: 'FH', color: 'from-indigo-400 to-purple-500',
+    subjects: [
+      { name:'Mathematics',      ca:34, exam:52, total:86 },
+      { name:'English Language', ca:30, exam:48, total:78 },
+      { name:'Physics',          ca:28, exam:42, total:70 },
+      { name:'Chemistry',        ca:32, exam:50, total:82 },
+      { name:'Biology',          ca:26, exam:40, total:66 },
+      { name:'Islamic Studies',  ca:36, exam:55, total:91 },
+    ]
+  },
+  {
+    id: 'STU-2025-0002', name: 'Abdi Warsame',    gender: 'Male',   grade: 'Grade 10',
+    attendRate: '88%', avg: 71.2, rank: '#2', initials: 'AW', color: 'from-emerald-400 to-teal-500',
+    subjects: [
+      { name:'Mathematics',      ca:28, exam:44, total:72 },
+      { name:'English Language', ca:25, exam:40, total:65 },
+      { name:'Physics',          ca:30, exam:46, total:76 },
+      { name:'Chemistry',        ca:27, exam:43, total:70 },
+      { name:'Biology',          ca:24, exam:38, total:62 },
+      { name:'Islamic Studies',  ca:33, exam:50, total:83 },
+    ]
+  },
+  {
+    id: 'STU-2025-0003', name: 'Hibo Mohamed',    gender: 'Female', grade: 'Grade 10',
+    attendRate: '95%', avg: 82.1, rank: '#3', initials: 'HM', color: 'from-pink-400 to-rose-500',
+    subjects: [
+      { name:'Mathematics',      ca:35, exam:53, total:88 },
+      { name:'English Language', ca:32, exam:50, total:82 },
+      { name:'Physics',          ca:29, exam:45, total:74 },
+      { name:'Chemistry',        ca:31, exam:49, total:80 },
+      { name:'Biology',          ca:33, exam:51, total:84 },
+      { name:'Islamic Studies',  ca:37, exam:57, total:94 },
+    ]
+  },
+  {
+    id: 'STU-2025-0004', name: 'Cabdi Xasan',     gender: 'Male',   grade: 'Grade 9',
+    attendRate: '79%', avg: 61.8, rank: '#4', initials: 'CX', color: 'from-amber-400 to-orange-500',
+    subjects: [
+      { name:'Mathematics',      ca:22, exam:36, total:58 },
+      { name:'English Language', ca:20, exam:33, total:53 },
+      { name:'Physics',          ca:25, exam:39, total:64 },
+      { name:'Chemistry',        ca:21, exam:35, total:56 },
+      { name:'Biology',          ca:23, exam:37, total:60 },
+      { name:'Islamic Studies',  ca:30, exam:48, total:78 },
+    ]
+  },
+  {
+    id: 'STU-2025-0005', name: 'Safia Omar',      gender: 'Female', grade: 'Grade 11',
+    attendRate: '85%', avg: 74.6, rank: '#5', initials: 'SO', color: 'from-violet-400 to-indigo-500',
+    subjects: [
+      { name:'Mathematics',      ca:29, exam:46, total:75 },
+      { name:'English Language', ca:27, exam:43, total:70 },
+      { name:'Physics',          ca:31, exam:47, total:78 },
+      { name:'Chemistry',        ca:28, exam:44, total:72 },
+      { name:'Biology',          ca:26, exam:41, total:67 },
+      { name:'Islamic Studies',  ca:34, exam:52, total:86 },
+    ]
+  },
+  {
+    id: 'STU-2025-0006', name: 'Mustafe Jama',    gender: 'Male',   grade: 'Grade 9',
+    attendRate: '70%', avg: 54.3, rank: '#6', initials: 'MJ', color: 'from-cyan-400 to-sky-500',
+    subjects: [
+      { name:'Mathematics',      ca:18, exam:30, total:48 },
+      { name:'English Language', ca:17, exam:28, total:45 },
+      { name:'Physics',          ca:20, exam:32, total:52 },
+      { name:'Chemistry',        ca:19, exam:31, total:50 },
+      { name:'Biology',          ca:22, exam:35, total:57 },
+      { name:'Islamic Studies',  ca:26, exam:42, total:68 },
+    ]
+  },
+];
+ 
+/* Attendance state */
+const attendanceState = {};
+ 
+/* ─────────────────────────────────────────────────────────────
+   PAGE SWITCHING
+───────────────────────────────────────────────────────────── */
+const pageTitles = {
+  'registration':   { title: 'Registration',    sub: 'Register new students into the system' },
+  'student-report': { title: 'Student Report',  sub: 'View individual student performance details' },
+  'exam-report':    { title: 'Exam Report',     sub: 'Class-wide exam results and analytics' },
+  'attendance':     { title: 'Attendance',      sub: 'Record and manage daily attendance' },
+};
+ 
+function showPage(page) {
+  // Hide all sections
+  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+  // Show requested section
+  document.getElementById('page-' + page).classList.add('active');
+ 
+  // Update nav link active state
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.querySelector(`[data-page="${page}"]`).classList.add('active');
+ 
+  // Update header
+  const info = pageTitles[page];
+  document.getElementById('page-title').textContent    = info.title;
+  document.getElementById('page-subtitle').textContent = info.sub;
+ 
+  // Page-specific init
+  if (page === 'student-report') initStudentReport();
+  if (page === 'exam-report')    renderExamReport();
+  if (page === 'attendance')     renderAttendance();
+ 
+  // Close sidebar on mobile
+  closeSidebar();
+}
+ 
+/* ─────────────────────────────────────────────────────────────
+   MOBILE SIDEBAR
+───────────────────────────────────────────────────────────── */
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebar-overlay').classList.add('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
+}
+ 
+/* ─────────────────────────────────────────────────────────────
+   PAGE 1: REGISTRATION
+───────────────────────────────────────────────────────────── */
+function handleRegistration(e) {
+  e.preventDefault();
+  const name  = document.getElementById('reg-name').value;
+  const grade = document.getElementById('reg-class').value;
+  document.getElementById('toast-msg').textContent = `${name} registered in ${grade}.`;
+  showToast();
+  e.target.reset();
+}
+ 
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.remove('hide');
+  t.classList.add('show');
+  setTimeout(hideToast, 4000);
+}
+function hideToast() {
+  const t = document.getElementById('toast');
+  t.classList.remove('show');
+  t.classList.add('hide');
+}
+ 
+/* ─────────────────────────────────────────────────────────────
+   PAGE 2: STUDENT REPORT
+───────────────────────────────────────────────────────────── */
+let currentStudentIndex = 0;
+ 
+function initStudentReport() {
+  renderStudentList(students);
+  selectStudent(0);
+}
+ 
+function renderStudentList(list) {
+  const container = document.getElementById('student-list');
+  document.getElementById('student-count').textContent = list.length;
+  container.innerHTML = list.map((s, i) => `
+    <div onclick="selectStudentById('${s.id}')"
+      class="px-5 py-3.5 flex items-center gap-3 cursor-pointer transition hover:bg-slate-50
+             ${students.indexOf(s) === currentStudentIndex ? 'bg-indigo-50 border-l-2 border-indigo-500' : ''}">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center
+                  text-white font-display font-700 text-xs flex-shrink-0" style="font-weight:700">
+        ${s.initials}
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-slate-800 text-sm truncate">${s.name}</p>
+        <p class="text-slate-400 text-xs">${s.id} · ${s.grade}</p>
+      </div>
+      <span class="text-xs font-semibold text-emerald-600">${s.avg}</span>
+    </div>
+  `).join('');
+}
+ 
+function selectStudentById(id) {
+  const idx = students.findIndex(s => s.id === id);
+  selectStudent(idx);
+}
+ 
+function selectStudent(idx) {
+  currentStudentIndex = idx;
+  const s = students[idx];
+ 
+  // Update profile card
+  document.getElementById('student-avatar').textContent    = s.initials;
+  document.getElementById('student-avatar').className =
+    `w-20 h-20 rounded-2xl bg-gradient-to-br ${s.color} flex items-center justify-center text-white font-display font-700 text-2xl flex-shrink-0 shadow-lg`;
+  document.getElementById('sd-name').textContent    = s.name;
+  document.getElementById('sd-id').textContent      = `${s.id} · ${s.grade}`;
+  document.getElementById('sd-attend').textContent  = s.attendRate;
+  document.getElementById('sd-avg').textContent     = s.avg;
+  document.getElementById('sd-rank').textContent    = s.rank;
+  document.getElementById('sd-class').textContent   = s.grade.replace('Grade ','G-');
+ 
+  // Performance table
+  const tbody = document.getElementById('performance-table');
+  tbody.innerHTML = s.subjects.map(sub => {
+    const grade = getLetterGrade(sub.total);
+    const remark = sub.total >= 50 ? 'Passed' : 'Failed';
+    const badgeClass = remark === 'Passed' ? 'badge-passed' : 'badge-failed';
+    const barPct = sub.total;
+    const barColor = sub.total >= 75 ? '#10b981' : sub.total >= 50 ? '#6366f1' : '#f43f5e';
+    return `
+      <tr>
+        <td class="px-6 py-3.5 font-medium text-slate-700">${sub.name}</td>
+        <td class="px-4 py-3.5 text-center">
+          <span class="font-semibold text-slate-800">${sub.ca}</span>
+        </td>
+        <td class="px-4 py-3.5 text-center">
+          <span class="font-semibold text-slate-800">${sub.exam}</span>
+        </td>
+        <td class="px-4 py-3.5">
+          <div class="flex items-center gap-2">
+            <span class="font-700 text-slate-800 w-8 text-center" style="font-weight:700">${sub.total}</span>
+            <div class="score-bar flex-1">
+              <div class="score-bar-fill" style="width:${barPct}%;background:${barColor}"></div>
+            </div>
+          </div>
+        </td>
+        <td class="px-4 py-3.5 text-center">
+          <span class="font-display font-700 text-slate-700" style="font-weight:700">${grade}</span>
+        </td>
+        <td class="px-4 py-3.5 text-center">
+          <span class="${badgeClass} text-xs font-semibold px-2.5 py-1 rounded-full">${remark}</span>
+        </td>
+      </tr>`;
+  }).join('');
+ 
+  // Re-render list to update selection highlight
+  filterStudentList();
+}
+ 
+function filterStudentList() {
+  const q     = (document.getElementById('student-search').value || '').toLowerCase();
+  const cls   = document.getElementById('student-class-filter').value;
+  const filtered = students.filter(s =>
+    (s.name.toLowerCase().includes(q) || s.id.toLowerCase().includes(q)) &&
+    (cls === '' || s.grade === cls)
+  );
+  renderStudentList(filtered);
+}
+ 
+function getLetterGrade(score) {
+  if (score >= 80) return 'A';
+  if (score >= 70) return 'B';
+  if (score >= 60) return 'C';
+  if (score >= 50) return 'D';
+  return 'F';
+}
+ 
+/* ─────────────────────────────────────────────────────────────
+   PAGE 3: EXAM REPORT
+───────────────────────────────────────────────────────────── */
+function renderExamReport() {
+  const cls  = document.getElementById('exam-class').value;
+  const term = document.getElementById('exam-term').value;
+ 
+  // Filter students by class
+  const filtered = students.filter(s => s.grade === cls);
+  if (filtered.length === 0) {
+    document.getElementById('exam-results-table').innerHTML =
+      `<tr><td colspan="7" class="text-center py-10 text-slate-400">No students found for ${cls}</td></tr>`;
+    return;
+  }
+ 
+  // Compute per-student totals (avg of all subjects)
+  const rows = filtered.map(s => ({
+    ...s,
+    totalMarks: s.subjects.reduce((a,b) => a + b.total, 0),
+    examAvg:    Math.round(s.subjects.reduce((a,b) => a + b.total, 0) / s.subjects.length * 10) / 10,
+  })).sort((a,b) => b.examAvg - a.examAvg);
+ 
+  const classAvg  = Math.round(rows.reduce((a,b) => a + b.examAvg, 0) / rows.length * 10) / 10;
+  const highest   = Math.max(...rows.map(r => r.totalMarks));
+  const passing   = rows.filter(r => r.examAvg >= 50).length;
+  const passRate  = Math.round(passing / rows.length * 100);
+ 
+  document.getElementById('exam-avg').textContent  = classAvg;
+  document.getElementById('exam-high').textContent = highest;
+  document.getElementById('exam-pass').textContent = passRate + '%';
+  document.getElementById('exam-table-subtitle').textContent = `${cls} · ${term} · 2024–2025`;
+ 
+  const tbody = document.getElementById('exam-results-table');
+  tbody.innerHTML = rows.map((r, i) => {
+    const grade    = getLetterGrade(r.examAvg);
+    const passed   = r.examAvg >= 50;
+    const rankIcon = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`;
+    return `
+      <tr>
+        <td class="px-6 py-4">
+          <span class="font-display font-700 text-slate-600 text-base" style="font-weight:700">${rankIcon}</span>
+        </td>
+        <td class="px-6 py-4">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br ${r.color} flex items-center justify-center
+                        text-white font-display font-700 text-xs flex-shrink-0" style="font-weight:700">
+              ${r.initials}
+            </div>
+            <span class="font-semibold text-slate-800">${r.name}</span>
+          </div>
+        </td>
+        <td class="px-4 py-4 text-slate-500 text-sm">${r.id}</td>
+        <td class="px-4 py-4 text-center font-700 text-slate-800 font-display" style="font-weight:700">${r.totalMarks}</td>
+        <td class="px-4 py-4 text-center">
+          <div class="inline-flex flex-col items-center">
+            <span class="font-700 text-slate-800" style="font-weight:700">${r.examAvg}</span>
+            <div class="score-bar w-16 mt-1">
+              <div class="score-bar-fill" style="width:${r.examAvg}%;background:${r.examAvg>=75?'#10b981':r.examAvg>=50?'#6366f1':'#f43f5e'}"></div>
+            </div>
+          </div>
+        </td>
+        <td class="px-4 py-4 text-center">
+          <span class="font-display font-700 text-lg ${r.examAvg>=80?'text-emerald-600':r.examAvg>=60?'text-indigo-600':'text-rose-600'}"
+                style="font-weight:700">${grade}</span>
+        </td>
+        <td class="px-4 py-4 text-center">
+          <span class="${passed ? 'badge-passed' : 'badge-failed'} text-xs font-semibold px-2.5 py-1 rounded-full">
+            ${passed ? 'Passed' : 'Failed'}
+          </span>
+        </td>
+      </tr>`;
+  }).join('');
+}
+ 
+/* ─────────────────────────────────────────────────────────────
+   PAGE 4: ATTENDANCE
+───────────────────────────────────────────────────────────── */
+function renderAttendance() {
+  const cls  = document.getElementById('attend-class').value;
+  const date = document.getElementById('attend-date').value;
+ 
+  document.getElementById('att-subtitle').textContent =
+    `${cls} · ${date ? new Date(date + 'T00:00').toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) : 'Today'}`;
+ 
+  const classStudents = students.filter(s => s.grade === cls);
+  document.getElementById('att-total').textContent = classStudents.length;
+ 
+  const stateKey = `${cls}_${date}`;
+  if (!attendanceState[stateKey]) {
+    attendanceState[stateKey] = {};
+    classStudents.forEach(s => attendanceState[stateKey][s.id] = null);
+  }
+ 
+  const state = attendanceState[stateKey];
+ 
+  const tbody = document.getElementById('attendance-table');
+  tbody.innerHTML = classStudents.map((s, i) => {
+    const status = state[s.id];
+    return `
+      <tr>
+        <td class="px-6 py-4 text-slate-400 text-sm font-medium">${String(i+1).padStart(2,'0')}</td>
+        <td class="px-6 py-4">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br ${s.color} flex items-center justify-center
+                        text-white font-display font-700 text-xs flex-shrink-0" style="font-weight:700">
+              ${s.initials}
+            </div>
+            <span class="font-semibold text-slate-800">${s.name}</span>
+          </div>
+        </td>
+        <td class="px-4 py-4 text-slate-500 text-sm">${s.id}</td>
+        <td class="px-4 py-4 text-center" id="status-${s.id}">
+          ${status
+            ? `<span class="${status==='present'?'badge-active':status==='absent'?'badge-absent':'badge-late'} text-xs font-semibold px-2.5 py-1 rounded-full capitalize">${status}</span>`
+            : '<span class="text-slate-300 text-xs font-medium">—</span>'}
+        </td>
+        <td class="px-4 py-4 text-center">
+          <div class="toggle-group justify-center">
+            <button onclick="markAttendance('${cls}','${date}','${s.id}','present')"
+              class="toggle-btn ${status==='present'?'present':'inactive'}">Present</button>
+            <button onclick="markAttendance('${cls}','${date}','${s.id}','absent')"
+              class="toggle-btn ${status==='absent'?'absent':'inactive'}">Absent</button>
+            <button onclick="markAttendance('${cls}','${date}','${s.id}','late')"
+              class="toggle-btn ${status==='late'?'late':'inactive'}">Late</button>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+ 
+  updateAttendanceSummary(cls, date);
+}
+ 
+function markAttendance(cls, date, id, status) {
+  const key = `${cls}_${date}`;
+  if (!attendanceState[key]) attendanceState[key] = {};
+  // Toggle off if same
+  attendanceState[key][id] = attendanceState[key][id] === status ? null : status;
+  renderAttendance();
+}
+ 
+function updateAttendanceSummary(cls, date) {
+  const key     = `${cls}_${date}`;
+  const state   = attendanceState[key] || {};
+  const values  = Object.values(state);
+  const present = values.filter(v => v === 'present').length;
+  const absent  = values.filter(v => v === 'absent').length;
+  const late    = values.filter(v => v === 'late').length;
+  const total   = students.filter(s => s.grade === cls).length;
+  const rate    = total > 0 ? Math.round((present + late) / total * 100) : 0;
+ 
+  document.getElementById('att-present').textContent = present;
+  document.getElementById('att-absent').textContent  = absent;
+  document.getElementById('att-late').textContent    = late;
+  document.getElementById('att-rate').textContent    = rate + '%';
+  document.getElementById('att-rate-bar').style.width = rate + '%';
+}
+ 
+function saveAttendance() {
+  const cls  = document.getElementById('attend-class').value;
+  const date = document.getElementById('attend-date').value;
+  const key  = `${cls}_${date}`;
+  const state = attendanceState[key] || {};
+  const unmarked = Object.values(state).filter(v => v === null).length;
+ 
+  if (unmarked > 0) {
+    alert(`⚠️ ${unmarked} student(s) are not yet marked. Please mark all students before saving.`);
+    return;
+  }
+  document.getElementById('toast-msg').textContent = `Attendance for ${cls} saved successfully.`;
+  showToast();
+}
+ 
+/* ─────────────────────────────────────────────────────────────
+   INITIALISATION
+───────────────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  // Set today's date in attendance date picker
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('attend-date').value = today;
+ 
+  // Set today's date in registration admission date
+  document.getElementById('reg-admission').value = today;
+ 
+  // Initial renders (Registration is shown first, others lazy-load on tab click)
+  initStudentReport();
+});
+</script>
+</body>
+</html>
