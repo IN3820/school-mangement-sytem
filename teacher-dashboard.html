@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - School Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+   <script src="teacher-dashboard.js" defer></script>
+</head>
+<body class="bg-gray-50 font-sans antialiased text-gray-800">
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <div class="w-64 bg-emerald-900 text-white flex flex-col justify-between hidden md:flex">
+            <div class="p-5">
+                <div class="flex items-center space-x-3 mb-8">
+                    <i class="fa-solid fa-chalkboard-user text-3xl text-emerald-400"></i>
+                    <span class="text-xl font-bold tracking-wider">Macallinka</span>
+                </div>
+                <nav class="space-y-2">
+                    <a href="#" data-target="hoyga-section" class="flex items-center space-x-3 px-4 py-3 bg-emerald-800 rounded-lg transition text-white sidebar-link">
+                        <i class="fa-solid fa-house"></i>
+                        <span>Hoyga (Home)</span>
+                    </a>
+                    <a href="#" data-target="dhibcaha-section" class="flex items-center space-x-3 px-4 py-3 hover:bg-emerald-800 rounded-lg transition text-emerald-200 sidebar-link">
+                        <i class="fa-solid fa-star"></i>
+                        <span>Gelinta Dhibcaha</span>
+                    </a>
+                    <a href="#" data-target="xaadirinta-section" class="flex items-center space-x-3 px-4 py-3 hover:bg-emerald-800 rounded-lg transition text-emerald-200 sidebar-link">
+                        <i class="fa-solid fa-calendar-check"></i>
+                        <span>Xaadirinta (Attendance)</span>
+                    </a>
+                    <a href="#" data-target="maaddooyinka-section" class="flex items-center space-x-3 px-4 py-3 hover:bg-emerald-800 rounded-lg transition text-emerald-200 sidebar-link">
+                        <i class="fa-solid fa-book-open"></i>
+                        <span>Maaddooyinkeyga</span>
+                    </a>
+                </nav>
+            </div>
+            <div class="p-5 border-t border-emerald-800">
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 hover:bg-red-700 rounded-lg transition text-red-200 hover:text-white logout-action">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Ka Bax (Logout)</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            
+            <header class="bg-white shadow-sm px-6 py-4 flex items-center justify-between relative z-50 border-b">
+                <h1 class="text-xl font-semibold text-gray-800">Xafiiska Macallinka</h1>
+                
+                <div class="relative">
+                    <button id="profile-menu-btn" class="flex items-center space-x-4 focus:outline-none cursor-pointer hover:opacity-80 transition">
+                        <span class="text-sm font-medium text-gray-600" id="teacher-display-name">Mcl. Maxamed Cali</span>
+                        <div class="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold" id="teacher-avatar">MC</div>
+                    </button>
+                    
+                    <div id="profile-dropdown" class="hidden absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-lg py-2 border text-sm text-gray-700">
+                        <a href="#" data-target="profile-section" class="flex items-center space-x-2 px-4 py-2.5 hover:bg-gray-100 sidebar-link">
+                            <i class="fa-solid fa-user text-gray-400 w-5"></i>
+                            <span>Profaylkayga</span>
+                        </a>
+                        <hr class="my-1">
+                        <a href="#" class="flex items-center space-x-2 px-4 py-2.5 hover:bg-red-50 text-red-600 logout-action">
+                            <i class="fa-solid fa-right-from-bracket w-5"></i>
+                            <span>Ka Bax (Logout)</span>
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <main class="p-6">
+                
+                <div id="hoyga-section" class="dashboard-section space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500 uppercase">Fasallada aad dhigto</p>
+                                <p class="text-3xl font-bold text-gray-800 mt-1">4 Fasal</p>
+                            </div>
+                            <div class="p-4 bg-emerald-50 text-emerald-600 rounded-lg"><i class="fa-solid fa-users text-2xl"></i></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500 uppercase">Saacadaha Toddobaadkan</p>
+                                <p class="text-3xl font-bold text-gray-800 mt-1">18 Saac</p>
+                            </div>
+                            <div class="p-4 bg-blue-50 text-blue-600 rounded-lg"><i class="fa-solid fa-clock text-2xl"></i></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500 uppercase">Xaadirista Maanta</p>
+                                <p class="text-3xl font-bold text-emerald-600 mt-1">Dhamaystiran</p>
+                            </div>
+                            <div class="p-4 bg-green-50 text-green-600 rounded-lg"><i class="fa-solid fa-check-double text-2xl"></i></div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-6 text-emerald-900">
+                        <h3 class="font-bold text-lg mb-1">Kusoo Dhawaada Dashboard-ka! 🌟</h3>
+                        <p class="text-sm">Dooro menu-yada dhinaca bidix si aad hawlaha ugu fuliso si fudud.</p>
+                    </div>
+                </div>
+
+                <div id="dhibcaha-section" class="dashboard-section space-y-6 hidden">
+                    <div class="bg-white rounded-xl shadow-sm border p-6">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b mb-4 gap-4">
+                            <h2 class="text-lg font-semibold text-gray-800"><i class="fa-solid fa-pen-to-square mr-2 text-emerald-600"></i> Geli Natiijada & Dhibcaha Imtixaanka</h2>
+                            
+                            <div class="flex flex-wrap gap-2">
+                                <label class="bg-emerald-50 text-emerald-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-emerald-100 border border-emerald-200 cursor-pointer transition flex items-center space-x-1">
+                                    <i class="fa-solid fa-file-excel"></i>
+                                    <span>Import Excel/Word</span>
+                                    <input type="file" id="import-marks-file" accept=".xlsx, .xls, .doc, .docx, .txt" class="hidden">
+                                </label>
+                                <button id="btn-edit-marks" class="bg-blue-50 text-blue-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 border border-blue-200 transition flex items-center space-x-1">
+                                    <i class="fa-solid fa-user-gear"></i>
+                                    <span>Edit Natiijo</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <form id="marks-form" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Dooro Fasalka</label>
+                                <select id="select-class" class="w-full border border-gray-300 rounded-lg p-2.5 bg-gray-50 focus:ring-2 focus:ring-emerald-500">
+                                    <option value="Form 4A">Form 4A</option>
+                                    <option value="Form 3B">Form 3B</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Dooro Maaddada</label>
+                                <select id="select-subject" class="w-full border border-gray-300 rounded-lg p-2.5 bg-gray-50 focus:ring-2 focus:ring-emerald-500">
+                                    <option value="Xisaab">Xisaab (Math)</option>
+                                    <option value="Fiisigis">Fiisigis (Physics)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nooca Imtixaanka</label>
+                                <select id="select-exam" class="w-full border border-gray-300 rounded-lg p-2.5 bg-gray-50 focus:ring-2 focus:ring-emerald-500">
+                                    <option value="Mid-Term">Mid-Term (30%)</option>
+                                    <option value="Final">Final Exam (70%)</option>
+                                </select>
+                            </div>
+                            <div class="flex items-end">
+                                <button type="submit" class="w-full bg-emerald-600 text-white p-2.5 rounded-lg font-medium hover:bg-emerald-700 transition">
+                                    Fur Liiska Ardayda
+                                </button>
+                            </div>
+                        </form>
+
+                        <div id="marks-table-container" class="overflow-x-auto hidden">
+                            <table class="w-full text-left border-collapse border border-gray-200 rounded-lg overflow-hidden">
+                                <thead>
+                                    <tr class="bg-gray-100 text-gray-700 text-sm">
+                                        <th class="p-3 border">Magaca Ardayga</th>
+                                        <th class="p-3 border text-center">Dhibcaha (Max: 100)</th>
+                                        <th class="p-3 border text-center">Percentage (%)</th>
+                                        <th class="p-3 border text-center">Average</th>
+                                        <th class="p-3 border text-center">Rank (Kaalinta)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="marks-tbody" class="text-sm text-gray-600">
+                                </tbody>
+                            </table>
+                            <div class="mt-4 flex justify-end">
+                                <button id="save-marks-btn" class="bg-emerald-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-emerald-700 transition">Kaydi Natiijada</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="xaadirinta-section" class="dashboard-section space-y-6 hidden">
+                    
+                    <div id="classes-grid-container" class="space-y-4">
+                        <h3 class="text-lg font-bold text-gray-800">Maamulka Fasallada (KG1 - Grade 9)</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            
+                            <div class="class-card bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:border-emerald-500 hover:shadow-md transition cursor-pointer" data-classname="KG1">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h4 class="text-xl font-bold text-gray-800">KG1</h4>
+                                        <p class="text-sm text-gray-400 mt-1">Ardayda dhigata: 15</p>
+                                    </div>
+                                    <span class="px-2.5 py-1 text-xs font-semibold bg-purple-100 text-purple-800 rounded-md">Primary</span>
+                                </div>
+                            </div>
+
+                            <div class="class-card bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:border-emerald-500 hover:shadow-md transition cursor-pointer" data-classname="KG2">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h4 class="text-xl font-bold text-gray-800">KG2</h4>
+                                        <p class="text-sm text-gray-400 mt-1">Ardayda dhigata: 18</p>
+                                    </div>
+                                    <span class="px-2.5 py-1 text-xs font-semibold bg-purple-100 text-purple-800 rounded-md">Primary</span>
+                                </div>
+                            </div>
+
+                            <div class="class-card bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:border-emerald-500 hover:shadow-md transition cursor-pointer" data-classname="Grade 1">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h4 class="text-xl font-bold text-gray-800">Grade 1</h4>
+                                        <p class="text-sm text-gray-400 mt-1">Ardayda dhigata: 20</p>
+                                    </div>
+                                    <span class="px-2.5 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-md">Primary</span>
+                                </div>
+                            </div>
+
+                            <div class="class-card bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:border-emerald-500 hover:shadow-md transition cursor-pointer" data-classname="Grade 8">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h4 class="text-xl font-bold text-gray-800">Grade 8</h4>
+                                        <p class="text-sm text-gray-400 mt-1">Ardayda dhigata: 1</p>
+                                    </div>
+                                    <span class="px-2.5 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-md">Primary</span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div id="attendance-sheet-container" class="space-y-6 hidden">
+                        <button id="btn-back-to-classes" class="text-sm font-medium text-emerald-600 hover:text-emerald-800 flex items-center space-x-1">
+                            <i class="fa-solid fa-arrow-left"></i> <span>Ku laabo Fasallada</span>
+                        </button>
+
+                        <div class="bg-white p-4 rounded-xl shadow-sm border flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800" id="active-class-title">Attendance Sheet</h3>
+                                <p class="text-xs text-gray-400" id="active-class-subtitle">Fasalka · Taariikhda</p>
+                            </div>
+                            <button onclick="alert('Xaadirinta waa la kaydiyay!')" class="bg-emerald-600 text-white py-2 px-6 rounded-lg text-sm font-medium hover:bg-emerald-700 transition flex items-center space-x-2">
+                                <i class="fa-solid fa-check"></i> <span>Save Attendance</span>
+                            </button>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm border p-6 overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="text-gray-400 font-semibold text-xs tracking-wider border-b pb-2 uppercase">
+                                        <th class="pb-3 w-12">#</th>
+                                        <th class="pb-3">Student Name</th>
+                                        <th class="pb-3 text-right pr-6">Mark Attendance</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-gray-600 text-sm divide-y" id="attendance-dynamic-tbody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div id="maaddooyinka-section" class="dashboard-section space-y-6 hidden">
+                    <div class="bg-white rounded-xl shadow-sm border p-6">
+                        <h2 class="text-lg font-semibold text-gray-800 mb-4"><i class="fa-solid fa-book-open mr-2 text-emerald-600"></i> Jadwalka iyo Macluumaadka Maaddooyinka</h2>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse border border-gray-100 rounded-xl overflow-hidden">
+                                <thead>
+                                    <tr class="bg-emerald-50 text-emerald-900 text-sm font-bold border-b">
+                                        <th class="p-4">Teacher Name</th>
+                                        <th class="p-4">Subject Name</th>
+                                        <th class="p-4">Schedule (Saacadaha)</th>
+                                        <th class="p-4">Grade Level</th>
+                                        <th class="p-4">Classroom</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-gray-700 text-sm divide-y">
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="p-4 font-medium text-gray-900">Mcl. Maxamed Cali</td>
+                                        <td class="p-4">Xisaab (Math)</td>
+                                        <td class="p-4">Khamiis (08:00 AM - 10:00 AM)</td>
+                                        <td class="p-4"><span class="px-2.5 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-md">Form 4A</span></td>
+                                        <td class="p-4 font-medium text-gray-600"><i class="fa-solid fa-door-open mr-1 text-gray-400"></i> Room 102</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="profile-section" class="dashboard-section space-y-6 hidden">
+                    <div class="bg-white rounded-xl shadow-sm border p-6 max-w-2xl mx-auto">
+                        <div class="flex items-center space-x-6 border-b pb-6">
+                            <div class="w-24 h-24 rounded-full bg-emerald-700 text-white text-3xl font-bold flex items-center justify-center">MC</div>
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-800">Mcl. Maxamed Cali</h2>
+                                <p class="text-sm text-emerald-600 font-medium">Username: TECH_XASAN233</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+</body>
+</html>

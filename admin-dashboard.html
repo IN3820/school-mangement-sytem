@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaabe Online Academy - Dashboardka Waxbarashada</title>
+    <style>
+        :root {
+            --primary: #0f2b48;
+            --accent: #d97706;
+            --light-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Navigation */
+        aside {
+            width: 260px;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 10px;
+        }
+
+        aside h2 {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: var(--accent);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+
+        .nav-group {
+            margin-bottom: 15px;
+        }
+
+        .nav-group-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #94a3b8;
+            padding: 5px 10px;
+            letter-spacing: 1px;
+        }
+
+        aside button {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #cbd5e1;
+            padding: 10px 12px;
+            text-align: left;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        aside button:hover, aside button.active {
+            background-color: var(--accent);
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Main Content Layout */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        header {
+            background: white;
+            padding: 15px 30px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.4rem;
+            color: var(--primary);
+        }
+
+        .container {
+            padding: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Lesson Creation Form */
+        .form-card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-control {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-control label {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        input, select, textarea {
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            outline: none;
+        }
+
+        textarea {
+            resize: vertical;
+            height: 90px;
+        }
+
+        .btn-submit {
+            background: var(--primary);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-submit:hover {
+            background: var(--accent);
+        }
+
+        /* Display Cards Layout */
+        .lesson-display {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            padding: 20px;
+        }
+
+        .card-header {
+            border-bottom: 2px solid var(--light-bg);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h3 {
+            color: var(--primary);
+        }
+
+        /* Specific Content Sections */
+        .vocab-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .vocab-item {
+            background: #f1f5f9;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .vocab-item strong {
+            color: var(--accent);
+        }
+
+        .dialogue-box {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chat-bubble {
+            padding: 10px 15px;
+            border-radius: 8px;
+            max-width: 80%;
+        }
+
+        .speaker-a {
+            background: #e0f2fe;
+            align-self: flex-start;
+        }
+
+        .speaker-b {
+            background: #fef3c7;
+            align-self: flex-end;
+        }
+
+        .exercise-list {
+            list-style-type: decimal;
+            padding-left: 20px;
+        }
+
+        .exercise-list li {
+            margin-bottom: 10px;
+        }
+
+        .contact-footer {
+            margin-top: auto;
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <h2>KAABE ACADEMY</h2>
+
+        <div class="nav-group">
+            <div class="nav-group-title">Koorsooyinka</div>
+            <button class="active" onclick="switchCourse('English')">🇬🇧 English</button>
+            <button onclick="switchCourse('Arabic')">🇸🇦 Arabic</button>
+            <button onclick="switchCourse('Computer')">💻 Computer Skills</button>
+            <button onclick="switchCourse('Quran')">📖 Qur'aan</button>
+            <button onclick="switchCourse('Diini')">🕌 Short Courses (Diini)</button>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-group-title">Heerarka</div>
+            <button onclick="filterLevel('Bilow')">Bilow</button>
+            <button onclick="filterLevel('Dhexdhexaad')">Dhexdhexaad</button>
+            <button onclick="filterLevel('Heer Sare')">Heer Sare</button>
+        </div>
+    </aside>
+
+    <main>
+        <header>
+            <h1 id="current-course-title">Koorosada: Luqada Ingiriisiga (English)</h1>
+            <span>Kaabe Online Academy Web Platform</span>
+        </header>
+
+        <div class="container">
+
+            <div class="form-card">
+                <h3>Soo Gali Cashar Cusub</h3>
+                <br>
+                <form id="lessonForm" onsubmit="addLesson(event)">
+                    <div class="form-grid">
+                        <div class="form-control">
+                            <label>Ciwaanka Casharka</label>
+                            <input type="text" id="lessonTitle" placeholder="Tus: Lesson 1 - Greeting" required>
+                        </div>
+                        <div class="form-control">
+                            <label>Heerka Koorsada</label>
+                            <select id="lessonLevel">
+                                <option value="Bilow">Bilow</option>
+                                <option value="Dhexdhexaad">Dhexdhexaad</option>
+                                <option value="Heer Sare">Heer Sare</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-control" style="margin-bottom: 15px;">
+                        <label>Ereyada & Macnahooda (Word - Meaning) [Qeybi koma ,]</label>
+                        <input type="text" id="lessonVocab" placeholder="Apple - Tufaax, Book - Buug">
+                    </div>
+
+                    <div class="form-control" style="margin-bottom: 15px;">
+                        <label>Wada-hadalka / Conversation (Qeybi Person A: ... | Person B: ...)</label>
+                        <textarea id="lessonDialogue" placeholder="Ali: Hello, how are you? | Farah: I am fine, thank you!"></textarea>
+                    </div>
+
+                    <div class="form-control" style="margin-bottom: 15px;">
+                        <label>Layliska / Exercises (Sual kasta saf cusub u saar)</label>
+                        <textarea id="lessonExercise" placeholder="1. Translate 'Hello' to Somali.&#10;2. Fill in the blank: How ___ you?"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-submit">Kaydi Casharka</button>
+                </form>
+            </div>
+
+            <div class="lesson-display" id="displayArea">
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Lesson 1: Daily Greetings (Tusaale)</h3>
+                        <span>Heerka: Bilow</span>
+                    </div>
+
+                    <h4>📚 Ereyada & Macnahooda:</h4>
+                    <br>
+                    <div class="vocab-grid">
+                        <div class="vocab-item"><span>Hello</span> <strong>Haye / Salaam</strong></div>
+                        <div class="vocab-item"><span>Morning</span> <strong>Subax</strong></div>
+                        <div class="vocab-item"><span>Teacher</span> <strong>Macallin</strong></div>
+                    </div>
+                    <br><hr><br>
+
+                    <h4>💬 Conversation (Wada-hadal):</h4>
+                    <br>
+                    <div class="dialogue-box">
+                        <div class="chat-bubble speaker-a"><strong>Ali:</strong> Good morning, teacher!</div>
+                        <div class="chat-bubble speaker-b"><strong>Teacher:</strong> Good morning! How are you today?</div>
+                    </div>
+                    <br><hr><br>
+
+                    <h4>📝 Laylis (Exercises):</h4>
+                    <br>
+                    <ol class="exercise-list">
+                        <li>Translate this sentence into Somali: "Good morning".</li>
+                        <li>Write down 3 new words you learned today.</li>
+                    </ol>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="contact-footer">
+            Nala Soo Xiriir: 📞 0637483738 / 0637483739 | ✉️ kaabeacademy@gmail.com | 🌐 www.kaabeacademy.com
+        </div>
+    </main>
+
+    <script>
+        let currentCourse = "English";
+
+        function switchCourse(courseName) {
+            currentCourse = courseName;
+            document.getElementById('current-course-title').innerText = "Koorosada: " + courseName;
+            
+            // Highlight active button
+            const buttons = document.querySelectorAll('aside button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function filterLevel(level) {
+            alert("Waxaad dooratay Heerka: " + level + " ee Koorsada " + currentCourse);
+        }
+
+        function addLesson(event) {
+            event.preventDefault();
+
+            const title = document.getElementById('lessonTitle').value;
+            const level = document.getElementById('lessonLevel').value;
+            const vocabInput = document.getElementById('lessonVocab').value;
+            const dialogueInput = document.getElementById('lessonDialogue').value;
+            const exerciseInput = document.getElementById('lessonExercise').value;
+
+            // Process Vocab
+            let vocabHTML = '';
+            if (vocabInput) {
+                const pairs = vocabInput.split(',');
+                vocabHTML = '<div class="vocab-grid">';
+                pairs.forEach(pair => {
+                    const parts = pair.split('-');
+                    if (parts.length === 2) {
+                        vocabHTML += `<div class="vocab-item"><span>${parts[0].trim()}</span> <strong>${parts[1].trim()}</strong></div>`;
+                    }
+                });
+                vocabHTML += '</div>';
+            }
+
+            // Process Dialogue
+            let dialogueHTML = '';
+            if (dialogueInput) {
+                const lines = dialogueInput.split('|');
+                dialogueHTML = '<div class="dialogue-box">';
+                lines.forEach((line, index) => {
+                    const speakerClass = index % 2 === 0 ? 'speaker-a' : 'speaker-b';
+                    dialogueHTML += `<div class="chat-bubble ${speakerClass}">${line.trim()}</div>`;
+                });
+                dialogueHTML += '</div>';
+            }
+
+            // Process Exercises
+            let exerciseHTML = '';
+            if (exerciseInput) {
+                const questions = exerciseInput.split('\n');
+                exerciseHTML = '<ol class="exercise-list">';
+                questions.forEach(q => {
+                    if(q.trim() !== '') {
+                        exerciseHTML += `<li>${q.trim()}</li>`;
+                    }
+                });
+                exerciseHTML += '</ol>';
+            }
+
+            // Construct Card
+            const cardHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h3>${title}</h3>
+                        <span>Heerka: ${level} (${currentCourse})</span>
+                    </div>
+
+                    ${vocabHTML ? '<h4>📚 Ereyada & Macnahooda:</h4><br>' + vocabHTML + '<br><hr><br>' : ''}
+                    ${dialogueHTML ? '<h4>💬 Conversation (Wada-hadal):</h4><br>' + dialogueHTML + '<br><hr><br>' : ''}
+                    ${exerciseHTML ? '<h4>📝 Laylis (Exercises):</h4><br>' + exerciseHTML : ''}
+                </div>
+            `;
+
+            // Insert into DOM
+            const displayArea = document.getElementById('displayArea');
+            displayArea.insertAdjacentHTML('afterbegin', cardHTML);
+
+            // Reset Form
+            document.getElementById('lessonForm').reset();
+        }
+    </script>
+</body>
+</html>

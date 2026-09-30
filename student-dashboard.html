@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard-ka Ardayga - Iskuul SMS</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .sidebar-open {
+            transform: translateX(0);
+        }
+        .sidebar-closed {
+            transform: translateX(-100%);
+        }
+        @media (min-width: 768px) {
+            .sidebar-closed {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body class="overflow-hidden bg-slate-50 text-slate-800">
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/40 z-40 hidden md:hidden transition-opacity"></div>
+
+        <aside id="sidebar" class="fixed md:static inset-y-0 left-0 w-64 bg-slate-900 text-slate-300 flex flex-col justify-between z-50 transition-transform duration-300 sidebar-closed border-r border-slate-800 shadow-xl md:shadow-none">
+            <div class="p-5">
+                <div class="flex items-center space-x-3 mb-8 px-2">
+                    <div class="p-2.5 bg-indigo-600 rounded-xl text-white shadow-lg shadow-indigo-600/30">
+                        <i class="fa-solid fa-graduation-cap text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="text-lg font-bold text-white tracking-wide block leading-none">Ardayga</span>
+                        <span class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Student Portal</span>
+                    </div>
+                </div>
+                
+                <nav class="space-y-1.5">
+                    <a href="#" data-target="hoyga-section" class="flex items-center space-x-3 px-4 py-3 bg-indigo-600 text-white rounded-xl font-medium shadow-md shadow-indigo-600/10 transition sidebar-link">
+                        <i class="fa-solid fa-house text-sm"></i>
+                        <span>Hoyga (Home)</span>
+                    </a>
+                    <a href="#" data-target="natiijada-section" class="flex items-center space-x-3 px-4 py-3 hover:bg-slate-800 hover:text-slate-100 rounded-xl font-medium transition sidebar-link">
+                        <i class="fa-solid fa-chart-simple text-sm"></i>
+                        <span>Natiijada Imtixaanka</span>
+                    </a>
+                    <a href="#" data-target="macallimiinta-section" class="flex items-center space-x-3 px-4 py-3 hover:bg-slate-800 hover:text-slate-100 rounded-xl font-medium transition sidebar-link">
+                        <i class="fa-solid fa-user-tie text-sm"></i>
+                        <span>Macallimiinteyda</span>
+                    </a>
+                </nav>
+            </div>
+            
+            <div class="p-4 border-t border-slate-800 bg-slate-950/40">
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 hover:bg-rose-500/10 hover:text-rose-400 rounded-xl font-medium transition text-slate-400 logout-action">
+                    <i class="fa-solid fa-right-from-bracket text-sm"></i>
+                    <span>Ka Bax (Logout)</span>
+                </a>
+            </div>
+        </aside>
+
+        <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+            
+            <header class="bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 py-4 flex items-center justify-between sticky top-0 z-30">
+                <button id="menu-toggle-btn" class="p-2 hover:bg-slate-100 rounded-xl text-slate-600 md:hidden transition cursor-pointer">
+                    <i class="fa-solid fa-bars-staggered text-lg"></i>
+                </button>
+                
+                <h1 class="text-lg font-bold text-slate-800 hidden sm:block">Xafiiska Ardayga</h1>
+                
+                <div class="relative ml-auto md:ml-0">
+                    <button id="profile-menu-btn" class="flex items-center space-x-3 focus:outline-none cursor-pointer p-1.5 hover:bg-slate-50 rounded-xl transition">
+                        <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm shadow-sm border border-indigo-100" id="top-avatar">
+                            --
+                        </div>
+                        <div class="text-left hidden sm:block">
+                            <span class="text-sm font-semibold text-slate-700 block leading-tight" id="top-welcome-name">Loading...</span>
+                            <span class="text-[11px] text-slate-400 font-medium block" id="top-student-id">ID: --</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 hidden sm:block pl-1"></i>
+                    </button>
+                    
+                    <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-xl py-1.5 border border-slate-100 text-sm text-slate-600 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div class="px-4 py-2.5 border-b border-slate-50">
+                            <p class="text-xs text-slate-400 font-medium">Fasalkaaga</p>
+                            <p class="text-sm font-bold text-slate-700 mt-0.5" id="dropdown-class-name">--</p>
+                        </div>
+                        <a href="#" class="flex items-center space-x-2.5 px-4 py-2.5 hover:bg-slate-50 hover:text-slate-900 transition logout-action text-rose-600 font-medium">
+                            <i class="fa-solid fa-right-from-bracket text-slate-400 text-xs w-4"></i>
+                            <span>Ka Bax (Logout)</span>
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <main class="p-4 md:p-6 space-y-6">
+                
+                <div id="hoyga-section" class="dashboard-section space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Boqolleyda Xaadirista</p>
+                                <p class="text-2xl font-bold text-slate-800 mt-1" id="card-attendance">--</p>
+                            </div>
+                            <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center shadow-sm"><i class="fa-solid fa-calendar-check text-lg"></i></div>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Kaalinta Fasalka</p>
+                                <p class="text-2xl font-bold text-slate-800 mt-1" id="card-rank">--</p>
+                            </div>
+                            <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center shadow-sm"><i class="fa-solid fa-trophy text-lg"></i></div>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Fasalka Hadda</p>
+                                <p class="text-2xl font-bold text-slate-800 mt-1" id="card-class">--</p>
+                            </div>
+                            <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center shadow-sm"><i class="fa-solid fa-school text-lg"></i></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl p-6 text-white shadow-lg shadow-indigo-600/10 relative overflow-hidden">
+                        <div class="relative z-10 max-w-md">
+                            <h3 class="font-bold text-xl mb-1.5" id="welcome-banner-title">Kusoo dhawaada Portalka Ardayga! 🚀</h3>
+                            <p class="text-indigo-100 text-xs leading-relaxed font-medium">Halkan waxaad ka eegi kartaa natiijada imtixaanaadkaaga, xaadirista, iyo jadwalka maaddooyinkaaga si toos ah.</p>
+                        </div>
+                        <i class="fa-solid fa-graduation-cap text-9xl absolute -right-4 -bottom-6 text-indigo-500/20 transform -rotate-12"></i>
+                    </div>
+                </div>
+
+                <div id="natiijada-section" class="dashboard-section space-y-4 hidden">
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+                        <div class="flex items-center space-x-3 pb-4 border-b border-slate-100 mb-4">
+                            <div class="w-8 h-8 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center"><i class="fa-solid fa-chart-line text-xs"></i></div>
+                            <h2 class="text-base font-bold text-slate-800">Liiska Dhibcaha & Imtixaanaadka</h2>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="text-slate-400 font-bold text-[11px] tracking-wider border-b border-slate-100 pb-3 uppercase bg-slate-50 rounded-lg">
+                                        <th class="p-3 pl-4 rounded-l-xl">Subject Name</th>
+                                        <th class="p-3 text-center">Class Activity (30%)</th>
+                                        <th class="p-3 text-center">Final Exam (70%)</th>
+                                        <th class="p-3 text-center">Total (100)</th>
+                                        <th class="p-3 text-center rounded-r-xl pr-4">Grade</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-slate-600 text-xs divide-y divide-slate-50" id="grades-dynamic-tbody">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="macallimiinta-section" class="dashboard-section space-y-4 hidden">
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+                        <div class="flex items-center space-x-3 pb-4 border-b border-slate-100 mb-6">
+                            <div class="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center"><i class="fa-solid fa-user-tie text-xs"></i></div>
+                            <h2 class="text-base font-bold text-slate-800">Macallimiinta Fasalka ku Dhiga</h2>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" id="teachers-grid-container">
+                            </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script src="student-dashboard.js"></script>
+</body>
+</html>

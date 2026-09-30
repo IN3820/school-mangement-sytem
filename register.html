@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Is-diiwaan geli - Iskuul SMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-100 h-screen flex items-center justify-center font-sans antialiased">
+
+    <div class="w-full max-w-md mx-4">
+        <div class="text-center mb-5">
+            <h1 class="text-2xl font-bold text-slate-800">Abuur Akoon Cusub</h1>
+            <p class="text-sm text-slate-500 mt-1">Ku biir nidaamka maamulka Iskuulka</p>
+        </div>
+
+        <div class="bg-white p-8 rounded-2xl shadow-md border border-slate-200">
+            <div id="alert-msg" class="hidden p-3 rounded-lg text-sm mb-4 border"></div>
+
+            <form id="register-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Magacaaga Buuxa</label>
+                    <div class="relative">
+                        <input type="text" id="reg-name" placeholder="Tusaale: Maxamed Cali" required class="w-full border rounded-xl p-3 pl-10 text-sm bg-slate-50 outline-none focus:ring-2 focus:ring-emerald-500">
+                        <i class="fa-solid fa-user absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Username-kaaga Iskuulka (ID Format)</label>
+                    <div class="relative">
+                        <input type="text" id="reg-username" placeholder="Tusaale: ADM_xasan01, TECH_xaashi001, STD_cumar0001" required class="w-full border rounded-xl p-3 pl-10 text-sm bg-slate-50 outline-none focus:ring-2 focus:ring-emerald-500">
+                        <i class="fa-solid fa-id-card absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1">Hubi inuu ku bilaawdo ADM_, TECH_, ama STD_</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">E-mail-kaaga</label>
+                    <div class="relative">
+                        <input type="email" id="reg-email" placeholder="magac@sms.com" required class="w-full border rounded-xl p-3 pl-10 text-sm bg-slate-50 outline-none focus:ring-2 focus:ring-emerald-500">
+                        <i class="fa-solid fa-envelope absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Erayga Sirta ah (Password)</label>
+                    <div class="relative">
+                        <input type="password" id="reg-password" placeholder="Ugu yaraan 6 xaraf" minlength="6" required class="w-full border rounded-xl p-3 pl-10 text-sm bg-slate-50 outline-none focus:ring-2 focus:ring-emerald-500">
+                        <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-emerald-600 text-white p-3 rounded-xl font-medium text-sm hover:bg-emerald-700 transition flex items-center justify-center space-x-2 shadow-md">
+                    <span>Xaqiiji Diiwaan Gelinta</span>
+                    <i class="fa-solid fa-user-plus text-xs"></i>
+                </button>
+            </form>
+
+            <div class="text-center mt-6 pt-4 border-t border-slate-100 text-sm text-slate-500">
+                Haddii aad hore akoon u lahayd? <a href="log_in.html" class="text-indigo-600 font-semibold hover:underline">Soo gal halkan</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("register-form").addEventListener("submit", function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById("reg-name").value.trim();
+            const username = document.getElementById("reg-username").value.trim(); // Lama beddelayo Case-ka si xarfaha waaweyn u huraan
+            const email = document.getElementById("reg-email").value.trim().toLowerCase();
+            const password = document.getElementById("reg-password").value;
+            const alertMsg = document.getElementById("alert-msg");
+
+            // 1. Habka loo ogaanayo Nooca (Role-ka) iyadoo la eegayo bilowga Username-ka
+            let role = "";
+            if (username.startsWith("ADM_")) {
+                role = "admin";
+            } else if (username.startsWith("TECH_")) {
+                role = "teacher";
+            } else if (username.startsWith("STD_")) {
+                role = "student";
+            } else {
+                // Haddii uu khaldan yahay bilowgu fariin khalaad saar
+                alertMsg.className = "bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4 border border-red-200 block";
+                alertMsg.innerHTML = `<i class="fa-solid fa-circle-exclamation mr-1"></i> Username-ka waa inuu ku bilaawdaa <b>ADM_</b>, <b>TECH_</b>, ama <b>STD_</b>`;
+                return;
+            }
+
+            let savedUsers = JSON.parse(localStorage.getItem("sms_registered_users")) || [];
+
+            // Hubi in Username-kan ama Email-kan hore loo qaatay
+            const userExists = savedUsers.some(u => u.username === username || u.email === email);
+            if (userExists) {
+                alertMsg.className = "bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4 border border-red-200 block";
+                alertMsg.innerHTML = `<i class="fa-solid fa-circle-exclamation mr-1"></i> Username-kan ama E-mail-kan hore ayaa loo isticmaalay!`;
+                return;
+            }
+
+            // Kaydi xogta isagoo wata Role-kii si otomaatig ah loogu garto login-ka
+            savedUsers.push({
+                name: name,
+                username: username,
+                email: email,
+                role: role,
+                password: password
+            });
+
+            localStorage.setItem("sms_registered_users", JSON.stringify(savedUsers));
+
+            alertMsg.className = "bg-green-50 text-green-700 p-3 rounded-lg text-sm mb-4 border border-green-200 block";
+            alertMsg.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> Akoonkaaga ${role.toUpperCase()} waa la sameeyay! Waxaa laguu wareejinayaa Login-ka...`;
+
+            setTimeout(() => {
+                window.location.replace("log_in.html");
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
